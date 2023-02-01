@@ -1,0 +1,17 @@
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+python_paths = "app/"
+norecursedirs = "env/*"
+addopts = "-vv -p no:cacheprovider --disable-warnings"
+testpaths = "tests/"
+python_files = "test_*.py"
+
+[tool.black]
+line-length = 79
+force-exclude = "/(tests|alembic/versions)/"
+
+[tool.isort]
+profile = "black"
+line_length = 79
+src_paths = ["app"]
+extend_skip = ["tests", "alembic/versions"]

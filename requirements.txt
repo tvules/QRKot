@@ -38,6 +38,7 @@ mixer==7.2.2
 packaging==21.3; python_version >= '3.6'
 passlib[bcrypt]==1.7.4
 pluggy==1.0.0
+pre-commit==3.0.2
 py==1.11.0
 pycodestyle==2.8.0
 pycparser==2.21
@@ -64,3 +65,5 @@ urllib3==1.26.9
 uvicorn[standard]==0.17.6
 watchgod==0.8.2
 websockets==10.3
+black==23.1.0
+isort==5.12.0
