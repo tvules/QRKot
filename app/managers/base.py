@@ -1,7 +1,6 @@
 from operator import eq
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import DeclarativeMeta
@@ -11,8 +10,6 @@ class ManagerBase:
     """Base model operations manager."""
 
     model: Optional[DeclarativeMeta] = None
-    create_schema: BaseModel = BaseModel
-    update_schema: BaseModel = BaseModel
 
     def __init__(self, model: DeclarativeMeta = None) -> None:
         if model is not None:
@@ -20,11 +17,11 @@ class ManagerBase:
         assert self.model, "You need to provide the model class"
 
     async def create(
-        self, data: create_schema, *, session: AsyncSession
+        self, data: Dict[str, Any], *, session: AsyncSession
     ) -> model:
         """Create the object from data."""
 
-        obj = self.model(**data.dict())
+        obj = self.model(**data)
         return await self._save(obj, session=session)
 
     async def get(self, *, session: AsyncSession, **kwargs) -> Optional[model]:
@@ -46,13 +43,13 @@ class ManagerBase:
         return objs.scalars().all()
 
     async def update(
-        self, obj: model, data: update_schema, *, session: AsyncSession
+        self, obj: model, data: Dict[str, Any], *, session: AsyncSession
     ) -> model:
         """Update the object from data."""
 
-        for attr, value in data.dict(exclude_unset=True).items():
-            if hasattr(self.model, attr):
-                setattr(obj, attr, value)
+        for key, value in data.items():
+            if hasattr(self.model, key):
+                setattr(obj, key, value)
         return await self._save(obj, session=session)
 
     async def delete(self, obj: model, *, session: AsyncSession) -> model:

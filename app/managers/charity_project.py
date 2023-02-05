@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.exceptions.charity_project import (
@@ -8,35 +10,31 @@ from app.exceptions.charity_project import (
 )
 from app.managers.base import ManagerBase
 from app.models.charity_project import CharityProject
-from app.schemas.charity_project import (
-    CharityProjectCreate,
-    CharityProjectUpdate,
-)
 
 
 class CharityProjectManager(ManagerBase):
     """Operations manager for the CharityProject model."""
 
     model = CharityProject
-    create_schema = CharityProjectCreate
-    update_schema = CharityProjectUpdate
 
     async def create(
-        self, data: create_schema, *, session: AsyncSession
+        self, data: Dict[str, Any], *, session: AsyncSession
     ) -> model:
-        await self.is_unique_name(data.name, session=session)
+        await self.is_unique_name(data["name"], session=session)
         return await super().create(data, session=session)
 
     async def update(
-        self, obj: model, data: update_schema, *, session: AsyncSession
+        self, obj: model, data: Dict[str, Any], *, session: AsyncSession
     ) -> model:
         if obj.fully_invested:
             raise ClosedProject("Закрытый проект нельзя редактировать!")
 
-        if data.name:
-            await self.is_unique_name(data.name, session=session)
+        if data.get("name"):
+            await self.is_unique_name(data["name"], session=session)
 
-        if data.full_amount and data.full_amount < obj.invested_amount:
+        if data.get("full_amount") and (
+            data["full_amount"] < obj.invested_amount
+        ):
             raise LessFullAmount(
                 "Цель проекта не может быть меньше собранных пожертвований"
             )

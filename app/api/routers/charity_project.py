@@ -37,7 +37,9 @@ async def create_charity_project(
     session: AsyncSession = Depends(get_async_session),
 ):
     try:
-        return await charity_project_manager.create(project, session=session)
+        return await charity_project_manager.create(
+            project.dict(), session=session
+        )
     except CharityProjectException as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=exc.reason
@@ -59,7 +61,7 @@ async def update_charity_project(
             charity_project_manager, session=session, id=project_id
         )
         return await charity_project_manager.update(
-            obj, project, session=session
+            obj, project.dict(exclude_unset=True), session=session
         )
     except CharityProjectException as exc:
         raise HTTPException(
