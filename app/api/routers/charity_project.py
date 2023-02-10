@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,6 +12,7 @@ from app.schemas.charity_project import (
     CharityProjectRead,
     CharityProjectUpdate,
 )
+from app.service.investing import invest_project
 from app.utils import get_object_or_404
 
 router = APIRouter()
@@ -17,7 +20,7 @@ router = APIRouter()
 
 @router.get(
     "/",
-    response_model=list[CharityProjectRead],
+    response_model=List[CharityProjectRead],
     response_model_exclude_none=True,
 )
 async def get_all_charity_projects(
@@ -37,9 +40,10 @@ async def create_charity_project(
     session: AsyncSession = Depends(get_async_session),
 ):
     try:
-        return await charity_project_manager.create(
+        project = await charity_project_manager.create(
             project.dict(), session=session
         )
+        return await invest_project(project, session=session)
     except CharityProjectException as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=exc.reason
