@@ -33,7 +33,6 @@ router = APIRouter()
 async def get_all_charity_projects(
     project_manager: ProjectManager = Depends(get_project_manager),
 ):
-    raise Exception
     return await project_manager.get_mult()
 
 
