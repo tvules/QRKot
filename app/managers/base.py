@@ -1,82 +1,27 @@
-from operator import eq
-from typing import Any, Dict, List, Optional
+from typing import Generic, List, Protocol, TypeVar
 
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.sql.expression import desc
+
+from app.core.db import SQLAlchemyDatabase, TModel
+from app.models.base import TInvestModel
 
 
-class ManagerBase:
-    """Base model operations manager."""
+class ManagerProtocol(Protocol[TModel]):
+    async def get(self, **kwargs) -> TModel:
+        ...
 
-    model: Optional[DeclarativeMeta] = None
 
-    def __init__(self, model: DeclarativeMeta = None) -> None:
-        if model is not None:
-            self.model = model
-        assert self.model, "You need to provide the model class"
+PManager = TypeVar("PManager", bound=ManagerProtocol)
 
-    async def create(
-        self, data: Dict[str, Any], *, session: AsyncSession
-    ) -> model:
-        """Create the object from data."""
 
-        obj = self.model(**data)
-        return await self._save(obj, session=session)
-
-    async def get(self, *, session: AsyncSession, **kwargs) -> Optional[model]:
-        """Get the object filtered by attrs."""
-
-        objs = await self._filter(session=session, **kwargs)
-        return objs.scalars().first()
-
-    async def get_all(self, *, session: AsyncSession) -> List[model]:
-        """Get all objects."""
-
-        objs = await self._filter(session=session)
-        return objs.scalars().all()
-
-    async def filter(self, *, session: AsyncSession, **kwargs) -> List[model]:
-        """Get all objects filtered by attrs."""
-
-        objs = await self._filter(session=session, **kwargs)
-        return objs.scalars().all()
-
-    async def update(
-        self, obj: model, data: Dict[str, Any], *, session: AsyncSession
-    ) -> model:
-        """Update the object from data."""
-
-        for key, value in data.items():
-            if hasattr(self.model, key):
-                setattr(obj, key, value)
-        return await self._save(obj, session=session)
-
-    async def delete(self, obj: model, *, session: AsyncSession) -> model:
-        """Delete the object."""
-
-        return await self._delete(obj, session=session)
-
-    async def _filter(self, *, session: AsyncSession, **kwargs):
-        return await session.execute(
-            select(self.model).where(
-                *(
-                    eq(getattr(self.model, attr), value)
-                    for attr, value in kwargs.items()
-                )
+class BaseInvestDatabase(
+    Generic[TInvestModel], SQLAlchemyDatabase[TInvestModel]
+):
+    async def get_not_invested(self, *, _desc=False) -> List[TInvestModel]:
+        order_column = self.db_table.create_date
+        objs = await self._session.execute(
+            self._get_equal_statement(fully_invested=False).order_by(
+                desc(order_column) if _desc else order_column
             )
         )
-
-    async def _save(
-        self, obj: model, *, refresh: bool = True, session: AsyncSession
-    ):
-        session.add(obj)
-        await session.commit()
-        if refresh:
-            await session.refresh(obj)
-        return obj
-
-    async def _delete(self, obj: model, *, session: AsyncSession):
-        await session.delete(obj)
-        await session.commit()
-        return obj
+        return objs.scalars().all()

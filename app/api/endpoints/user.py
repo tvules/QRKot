@@ -10,4 +10,4 @@ router.include_router(fastapi_users.get_users_router(UserRead, UserUpdate))
 
 @router.delete("/{id}", tags=["users"], deprecated=True)
 async def delete_user(id: int):
-    raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED)
+    raise HTTPException(status.HTTP_405_METHOD_NOT_ALLOWED)

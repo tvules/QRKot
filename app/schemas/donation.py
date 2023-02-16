@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TypeVar
 
 from pydantic import BaseModel, NonNegativeInt, PositiveInt
 
@@ -64,3 +64,8 @@ class DonationReadAll(DonationRead):
                 "close_date": None,
             },
         }
+
+
+TDonationCreate = TypeVar("TDonationCreate", bound=DonationCreate)
+TDonationRead = TypeVar("TDonationRead", bound=DonationRead)
+TDonationReadAll = TypeVar("TDonationReadAll", bound=DonationReadAll)

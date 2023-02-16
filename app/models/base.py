@@ -6,7 +6,7 @@ from sqlalchemy import Boolean, Column, DateTime, Integer
 from app.core.db import Base
 
 
-class InvestedBase(Base):
+class InvestBase(Base):
     __abstract__ = True
 
     full_amount: int = Column(Integer, nullable=False)
@@ -16,4 +16,4 @@ class InvestedBase(Base):
     close_date: datetime = Column(DateTime)
 
 
-InvestModel = TypeVar("InvestModel", bound=InvestedBase)
+TInvestModel = TypeVar("TInvestModel", bound=InvestBase)

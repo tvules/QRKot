@@ -1,34 +1,13 @@
-from typing import AsyncGenerator
-
-from fastapi import Depends
-from fastapi_users import BaseUserManager, FastAPIUsers, IntegerIDMixin
+from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
     JWTStrategy,
 )
-from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.db import get_async_session
+from app.managers.user import get_user_manager
 from app.models.user import User
-
-
-class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
-    pass
-
-
-async def get_user_db(
-    session: AsyncSession = Depends(get_async_session),
-) -> AsyncGenerator[SQLAlchemyUserDatabase, None]:
-    yield SQLAlchemyUserDatabase(session, User)
-
-
-async def get_user_manager(
-    user_db: SQLAlchemyUserDatabase = Depends(get_user_db),
-) -> AsyncGenerator[UserManager, None]:
-    yield UserManager(user_db)
 
 
 def get_jwt_strategy() -> JWTStrategy:

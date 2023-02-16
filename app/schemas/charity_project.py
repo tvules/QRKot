@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TypeVar
 
 from pydantic import (
     BaseModel,
@@ -10,10 +10,10 @@ from pydantic import (
     validator,
 )
 
-CREATE_DATE = datetime.now().isoformat(timespec="seconds")
+from app.core.config import settings
 
 
-class CharityProjectBase(BaseModel):
+class ProjectBase(BaseModel):
     """Base schema for the CharityProject model."""
 
     name: str = Field(..., min_length=1, max_length=100)
@@ -30,7 +30,7 @@ class CharityProjectBase(BaseModel):
         }
 
 
-class CharityProjectRead(CharityProjectBase):
+class ProjectRead(ProjectBase):
     """Read schema for the CharityProject model."""
 
     id: int
@@ -44,22 +44,22 @@ class CharityProjectRead(CharityProjectBase):
         schema_extra = {
             "example": {
                 "id": 1,
-                **CharityProjectBase.Config.schema_extra["example"],
+                **ProjectBase.Config.schema_extra["example"],
                 "invested_amount": 0,
                 "fully_invested": False,
-                "create_date": CREATE_DATE,
+                "create_date": settings.start_time,
                 "close_date": None,
             },
         }
 
 
-class CharityProjectCreate(CharityProjectBase):
+class ProjectCreate(ProjectBase):
     """Create schema for the CharityProject model."""
 
     pass
 
 
-class CharityProjectUpdate(CharityProjectBase):
+class ProjectUpdate(ProjectBase):
     """Update schema for the CharityProject model."""
 
     name: Optional[str] = Field(None, min_length=1, max_length=100)
@@ -74,3 +74,7 @@ class CharityProjectUpdate(CharityProjectBase):
         if value is None:
             raise ValueError("Value cannot be null")
         return value
+
+
+TProjectCreate = TypeVar("TProjectCreate", bound=ProjectCreate)
+TProjectUpdate = TypeVar("TProjectUpdate", bound=ProjectUpdate)
