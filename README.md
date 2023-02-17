@@ -23,8 +23,8 @@ QRKot - Фонд собирает пожертвования на различн
 **1. Клонируйте репозиторий**
 
 ```shell
-git clone https://github.com/tvules/cat_charity_fund.git
-cd cat_charity_fund
+git clone https://github.com/tvules/QRKot.git
+cd qrkot
 ```
 
 **2. Установите зависимости проекта**
